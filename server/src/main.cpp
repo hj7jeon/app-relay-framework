@@ -31,9 +31,84 @@ void rkf_socket_connection_state_changed_cb(int, bt_socket_connection_state_e, b
 void rkf_state_changed_cb(int, bt_adapter_state_e, void *);
 gboolean timeout_func_cb(gpointer);
 
-int rkf_initialize_bluetooth(const char *device_name) {
 
-#if 1		//Minjin
+
+#define VCONF_PLAYER_SHUFFLE	"db/private/org.tizen.music-player/shuffle"
+#define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/progress_pos"
+
+
+void _vconf_noti_callback(keynode_t *node, void* data)
+{
+	printf("%s:+++\n", __func__);
+
+
+		struct appdata *ad = (struct appdata *)data;
+		char *keyname = vconf_keynode_get_name(node);
+	
+		printf("key changed: %s\n", keyname);
+#if 1
+		/*
+		if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
+		{
+			bool shuffle = vconf_keynode_get_bool(node);
+			printf("shuffle=%d\n", shuffle);
+		}
+		else if (strcmp(keyname, VCONF_PLAYER_PROGRESS) == 0)
+		{
+			double progress = vconf_get_dbl(node);
+			printf("prgress changed: %ld", progress);
+		}
+		else if (strcmp(keyname, MP_VCONFKEY_PLAYING_PID) == 0)
+		{
+			int playing_pid = vconf_keynode_get_int(node);
+			if (playing_pid != getpid())
+			{
+				DEBUG_TRACE("other player activated : [pid:%d]", playing_pid);
+				if (ad->player_state == PLAY_STATE_PLAYING) {
+					ad->paused_by_other_player = TRUE;
+					mp_play_control_play_pause(ad, false);
+				}
+	
+				//mp_minicontroller_destroy(ad);
+			}
+		}
+		*/		
+#else
+	switch(vconf_keynode_get_type(node))
+   {
+	  case VCONF_TYPE_INT:
+   printf("key = %s, value = %d(int)\n",
+	   vconf_keynode_get_name(key), vconf_keynode_get_int(key));
+   break;
+	  case VCONF_TYPE_BOOL:
+   printf("key = %s, value = %d(bool)\n",
+	   vconf_keynode_get_name(key), vconf_keynode_get_bool(key));
+   break;
+	  case VCONF_TYPE_DOUBLE:
+   printf("key = %s, value = %f(double)\n",
+	   vconf_keynode_get_name(key), vconf_keynode_get_dbl(key));
+   break;
+	  case VCONF_TYPE_STRING:
+   printf("key = %s, value = %s(string)\n",
+	   vconf_keynode_get_name(key), vconf_keynode_get_str(key));
+   break;
+	  default:
+   fprintf(stderr, "Unknown Type(%d)\n", vconf_keynode_get_type(key));
+   break;
+   }
+   return;
+
+#endif		
+
+}
+
+bool initVconf()
+{
+	bool res = TRUE;
+
+	printf("%s:+++\n", __func__);
+#if 1
+	//TODO: vconf function test
 	int b_val = 0;
 	vconf_get_bool("db/private/org.tizen.music-player/shuffle", &b_val);
 
@@ -41,10 +116,36 @@ int rkf_initialize_bluetooth(const char *device_name) {
 		vconf_set_bool("db/private/org.tizen.music-player/shuffle", FALSE);
 	else 
 		vconf_set_bool("db/private/org.tizen.music-player/shuffle", TRUE);
-	
+
 	printf("b_val=%d\n", !b_val);
-#endif	
+#endif
+
+	if (vconf_notify_key_changed(VCONF_PLAYER_SHUFFLE, _vconf_noti_callback, NULL) < 0)
+	{
+		printf("Error when register callback\n");
+		res = FALSE;
+	}
 	
+	printf("%s:---:res=%d\n", __func__, res);
+	return res; 
+}
+
+bool deinitVconf()
+{
+	bool res = TRUE;
+	
+	printf("%s:+++\n", __func__);
+	
+    vconf_ignore_key_changed(VCONF_PLAYER_SHUFFLE, _vconf_noti_callback);
+	
+	printf("%s:---:res=%d\n", __func__, res);
+	
+	return res;
+}
+
+
+int rkf_initialize_bluetooth(const char *device_name) {
+
 	// Initialize bluetooth and get adapter state
 	int ret;
 	ret = bt_initialize();
@@ -266,6 +367,10 @@ int main(int argc, char *argv[])
 		device_name = argv[1];
 	}
 
+	// Initialize vconf environments
+	initVconf();
+
+#if 0	// <--- ignore temporarily
 	// Initialize bluetooth
 	error = rkf_initialize_bluetooth(device_name);
 	if(error != 0) {
@@ -280,9 +385,13 @@ int main(int argc, char *argv[])
 		ret = -3;
 		goto error_end_with_socket;
 	}
+#endif	//#if 0
 
 	// If succeed to accept a connection, start a main loop.
 	g_main_loop_run(gMainLoop);
+
+	// Deinitializing vconf
+	deinitVconf();
 
 	ALOGI("Server is terminated successfully\n");
 
