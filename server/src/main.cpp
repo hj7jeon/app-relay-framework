@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <vconf.h>
 
 #include "common.h"
 #include <dlog.h>
@@ -31,6 +32,19 @@ void rkf_state_changed_cb(int, bt_adapter_state_e, void *);
 gboolean timeout_func_cb(gpointer);
 
 int rkf_initialize_bluetooth(const char *device_name) {
+
+#if 1		//Minjin
+	int b_val = 0;
+	vconf_get_bool("db/private/org.tizen.music-player/shuffle", &b_val);
+
+	if(b_val) 
+		vconf_set_bool("db/private/org.tizen.music-player/shuffle", FALSE);
+	else 
+		vconf_set_bool("db/private/org.tizen.music-player/shuffle", TRUE);
+	
+	printf("b_val=%d\n", !b_val);
+#endif	
+	
 	// Initialize bluetooth and get adapter state
 	int ret;
 	ret = bt_initialize();
@@ -120,7 +134,6 @@ int rkf_initialize_bluetooth(const char *device_name) {
 		return -10;
 	}
 
-	
 	return 0;
 }
 

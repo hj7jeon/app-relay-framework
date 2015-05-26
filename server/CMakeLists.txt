@@ -7,11 +7,13 @@ INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(rpkgs-dlog REQUIRED dlog)
 PKG_CHECK_MODULES(rpkgs-capi REQUIRED capi-network-bluetooth capi-system-info)
 PKG_CHECK_MODULES(rpkgs-glib REQUIRED glib-2.0)
+PKG_CHECK_MODULES(rpkgs REQUIRED vconf heynoti)
 
 # Add CFLAGS used for required modules
 ADD_DEFINITIONS(${rpkgs-dlog_CFLAGS})
 ADD_DEFINITIONS(${rpkgs-capi_CFLAGS})
 ADD_DEFINITIONS(${rpkgs-glib_CFLAGS})
+ADD_DEFINITIONS(${rpkgs_CFLAGS})
 
 # Set include directories
 INCLUDE_DIRECTORIES(
@@ -27,7 +29,7 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 )
 
 # Set LDFLAGS
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${rpkgs-dlog_LDFLAGS} ${rpkgs-capi_LDFLAGS} ${rpkgs-glib_LDFLAGS} "-ldl -lrt")
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${rpkgs-dlog_LDFLAGS} ${rpkgs-capi_LDFLAGS} ${rpkgs-glib_LDFLAGS} "-ldl -lrt -lvconf")
 
 # Set CFLAGS
 ADD_DEFINITIONS(-Wall -O3) 

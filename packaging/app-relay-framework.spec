@@ -1,7 +1,7 @@
 ## Basic Descriptions of this package
 Name:       app-relay-framework
 Summary:    app relay framework
-Version:		1.0
+Version:		1.1
 Release:    1
 Group:      Framework/system
 License:    Apache License, Version 2.0
@@ -16,6 +16,9 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(capi-network-bluetooth)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(dlog)
+BuildRequires: pkgconfig(glib-2.0)
+BuildRequires: pkgconfig(vconf)
+BuildRequires: pkgconfig(heynoti)
 
 ## Description string that this package's human users can understand
 %description
