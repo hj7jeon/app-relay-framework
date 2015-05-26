@@ -1,7 +1,7 @@
 ## Basic Descriptions of this package
 Name:       app-relay-framework
 Summary:    app relay framework
-Version:		1.0
+Version:		1.1
 Release:    1
 Group:      Framework/system
 License:    Apache License, Version 2.0
