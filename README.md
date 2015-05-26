@@ -10,4 +10,4 @@ You can build with following command for armv7l target board.
 
 <code>$ gbs build -A armv7l</code>
 
-
+<code>$ gbs build -A armv7l --include-all</code>

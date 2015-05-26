@@ -54,7 +54,7 @@ ln -s ../app-relay-framework.service %{buildroot}%{_libdir}/systemd/system/graph
 ## Binary Package: File list
 %files
 %manifest app-relay-framework.manifest
-%{_bindir}/rkf_server
+%{_bindir}/app_relay_svc
 %{_libdir}/systemd/system/app-relay-framework.service
 %{_libdir}/systemd/system/graphical.target.wants/app-relay-framework.service
 /usr/share/license/%{name}

@@ -1,10 +1,10 @@
 [Unit]
-Description=Start the remote key framework
-After=load-virtual-homekey.service bluetooth.service
+Description=Start the app relay framework
+#After=load-virtual-homekey.service bluetooth.service
 
 [Service]
 #You can the name of bluetooth device by changing the parameter to rkf_server.
-ExecStart=/usr/bin/rkf_server Tizen-RK
+ExecStart=/usr/bin/app_relay_svc
 Restart=always
 RestartSec=1
 
