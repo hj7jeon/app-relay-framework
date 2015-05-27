@@ -10,8 +10,10 @@
 #include <glib.h>
 #include <bluetooth.h>
 
+#include <wifi.h>
+
 #undef LOG_TAG
-#define LOG_TAG "REMOTE_KEY_FW"
+#define LOG_TAG "APP_RELAY_FW"
 
 static GMainLoop* gMainLoop = NULL;
 static bt_adapter_visibility_mode_e gVisibilityMode = BT_ADAPTER_VISIBILITY_MODE_NON_DISCOVERABLE;
@@ -44,7 +46,8 @@ int rkf_initialize_bluetooth(const char *device_name) {
 	
 	printf("b_val=%d\n", !b_val);
 #endif	
-	
+
+#if 0	// By Jeon Hyojin
 	// Initialize bluetooth and get adapter state
 	int ret;
 	ret = bt_initialize();
@@ -133,6 +136,7 @@ int rkf_initialize_bluetooth(const char *device_name) {
 		ALOGD("Unknown exception is occured in bt_socket_set_data_received_cb(): %x", ret);
 		return -10;
 	}
+#endif	
 
 	return 0;
 }
@@ -140,6 +144,8 @@ int rkf_initialize_bluetooth(const char *device_name) {
 int rkf_finalize_bluetooth_socket(void) {
 	int ret;
 	sleep(5); // Wait for completing delivery
+
+#if 0	// Hyojin Jeon	
 	ret = bt_socket_destroy_rfcomm(gSocketFd);
 	if(ret != BT_ERROR_NONE)
 	{
@@ -148,11 +154,16 @@ int rkf_finalize_bluetooth_socket(void) {
 	}
 
 	bt_deinitialize();
+#endif	
 	return 0;
 }
 
 int rkf_finalize_bluetooth(void) {
+
+	#if 0 
 	bt_deinitialize();
+	#endif
+	
 	return 0;
 }
 
@@ -249,14 +260,72 @@ gboolean timeout_func_cb(gpointer data)
 	return FALSE;
 }
 
+
+static const char *__test_convert_error_to_string(wifi_error_e err_type)
+{
+	switch (err_type) {
+	case WIFI_ERROR_NONE:
+		return "NONE";
+	case WIFI_ERROR_INVALID_PARAMETER:
+		return "INVALID_PARAMETER";
+	case WIFI_ERROR_OUT_OF_MEMORY:
+		return "OUT_OF_MEMORY";
+	case WIFI_ERROR_INVALID_OPERATION:
+		return "INVALID_OPERATION";
+	case WIFI_ERROR_ADDRESS_FAMILY_NOT_SUPPORTED:
+		return "ADDRESS_FAMILY_NOT_SUPPORTED";
+	case WIFI_ERROR_OPERATION_FAILED:
+		return "OPERATION_FAILED";
+	case WIFI_ERROR_NO_CONNECTION:
+		return "NO_CONNECTION";
+	case WIFI_ERROR_NOW_IN_PROGRESS:
+		return "NOW_IN_PROGRESS";
+	case WIFI_ERROR_ALREADY_EXISTS:
+		return "ALREADY_EXISTS";
+	case WIFI_ERROR_OPERATION_ABORTED:
+		return "OPERATION_ABORTED";
+	case WIFI_ERROR_DHCP_FAILED:
+		return "DHCP_FAILED";
+	case WIFI_ERROR_INVALID_KEY:
+		return "INVALID_KEY";
+	case WIFI_ERROR_NO_REPLY:
+		return "NO_REPLY";
+	case WIFI_ERROR_SECURITY_RESTRICTED:
+		return "SECURITY_RESTRICTED";
+	}
+
+	return "UNKNOWN";
+}
+
+int test_is_activated(void)
+{
+	int rv = 0;
+	bool state = false;
+
+	rv = wifi_is_activated(&state);
+
+	if (rv != WIFI_ERROR_NONE) {
+		printf("Fail to get Wi-Fi device state [%s]\n", __test_convert_error_to_string((wifi_error_e)rv));
+		return -1;
+	}
+
+	printf("Success to get Wi-Fi device state : %s\n", (state) ? "TRUE" : "FALSE");
+
+	return 1;
+}
+
 int main(int argc, char *argv[])
 {
 	int error, ret = 0;
-	const char default_device_name[] = "Tizen-RK";
-	const char *device_name = NULL;
-	gMainLoop = g_main_loop_new(NULL, FALSE);
-	ALOGD("Sever started\n");
+//	const char default_device_name[] = "Tizen-RK";
+//	const char *device_name = NULL;
 
+	int rv;
+
+	gMainLoop = g_main_loop_new(NULL, FALSE);
+	printf("App Relay Sever started\n");
+
+#if 0
 	if(argc < 2) {
 		char errMsg[] = "No bluetooth device name, so its name is set as default.";
 		printf("%s\n", errMsg);
@@ -265,7 +334,11 @@ int main(int argc, char *argv[])
 	} else {
 		device_name = argv[1];
 	}
+#endif	
 
+	rv = test_is_activated();
+
+#if 0
 	// Initialize bluetooth
 	error = rkf_initialize_bluetooth(device_name);
 	if(error != 0) {
@@ -292,6 +365,8 @@ error_end_with_socket:
 
 error_end_without_socket:
 	rkf_finalize_bluetooth();
+
+#endif	
 	return ret;
 }
 

@@ -5,7 +5,7 @@ project(app_relay_svc CXX)
 # PKG_SEARCH_MODULE: used to check for given modules and uses the first working one
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(rpkgs-dlog REQUIRED dlog)
-PKG_CHECK_MODULES(rpkgs-capi REQUIRED capi-network-bluetooth capi-system-info)
+PKG_CHECK_MODULES(rpkgs-capi REQUIRED capi-network-bluetooth capi-system-info capi-network-wifi)
 PKG_CHECK_MODULES(rpkgs-glib REQUIRED glib-2.0)
 PKG_CHECK_MODULES(rpkgs REQUIRED vconf heynoti)
 
