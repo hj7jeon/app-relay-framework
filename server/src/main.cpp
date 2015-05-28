@@ -16,6 +16,11 @@
 #undef LOG_TAG
 #define LOG_TAG "REMOTE_KEY_FW"
 
+#define VCONF_PLAYER_SHUFFLE	"db/private/org.tizen.music-player/shuffle"
+#define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/progress_pos"
+
+#define VCONFKEY_APP_RELAY	"db/private/org.tizen.menu-screen/app_relay"
+
 static GMainLoop* gMainLoop = NULL;
 static bt_adapter_visibility_mode_e gVisibilityMode = BT_ADAPTER_VISIBILITY_MODE_NON_DISCOVERABLE;
 static int gSocketFd = -1;
@@ -34,12 +39,6 @@ void rkf_socket_connection_state_changed_cb(int, bt_socket_connection_state_e, b
 void rkf_state_changed_cb(int, bt_adapter_state_e, void *);
 gboolean timeout_func_cb(gpointer);
 
-
-
-#define VCONF_PLAYER_SHUFFLE	"db/private/org.tizen.music-player/shuffle"
-#define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/progress_pos"
-
-
 void _vconf_noti_callback(keynode_t *node, void* data)
 {
 	printf("%s:+++\n", __func__);
@@ -50,8 +49,12 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 	
 		printf("key changed: %s\n", keyname);
 #if 1
+		if (strcmp(keyname, VCONFKEY_APP_RELAY) == 0) 
+		{
+			printf("Pause MP3 player\n");
+		}
 		/*
-		if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
+	  else if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
 		{
 			bool shuffle = vconf_keynode_get_bool(node);
 			printf("shuffle=%d\n", shuffle);
@@ -183,6 +186,12 @@ bool initVconf()
 		res = FALSE;
 	}
 	
+	if (vconf_notify_key_changed(VCONFKEY_APP_RELAY, _vconf_noti_callback, NULL) < 0)
+	{
+		printf("Error when register callback\n");
+		res = FALSE;
+	}
+
 	printf("%s:---:res=%d\n", __func__, res);
 	return res; 
 }
