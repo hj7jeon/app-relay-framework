@@ -26,6 +26,7 @@ INCLUDE_DIRECTORIES(
 ADD_EXECUTABLE(${PROJECT_NAME}
 	src/common.cpp
 	src/main.cpp
+  src/udp_test.cpp
 )
 
 # Set LDFLAGS
