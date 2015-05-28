@@ -16,9 +16,11 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(capi-network-bluetooth)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(dlog)
-BuildRequires: pkgconfig(glib-2.0)
-BuildRequires: pkgconfig(vconf)
-BuildRequires: pkgconfig(heynoti)
+BuildRequires:  pkgconfig(glib-2.0)
+BuildRequires:  pkgconfig(vconf)
+BuildRequires:  pkgconfig(heynoti)
+BuildRequires:  pkgconfig(ecore-x)
+BuildRequires:  pkgconfig(ecore-evas)
 
 ## Description string that this package's human users can understand
 %description
