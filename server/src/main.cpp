@@ -8,6 +8,9 @@
 #include "common.h"
 #include <dlog.h>
 #include <bluetooth.h>
+#include <Ecore.h>
+#include <Ecore_X.h>
+#include <Ecore_Evas.h>
 
 #include <wifi.h>
 #include <netdb.h>
@@ -23,6 +26,11 @@
 
 #undef LOG_TAG
 #define LOG_TAG "APP_RELAY_FW"
+
+#define VCONF_PLAYER_SHUFFLE	"db/private/org.tizen.music-player/shuffle"
+#define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/progress_pos"
+
+#define VCONFKEY_APP_RELAY	"db/private/org.tizen.menu-screen/app_relay"
 
 static GMainLoop* gMainLoop = NULL;
 static bt_adapter_visibility_mode_e gVisibilityMode = BT_ADAPTER_VISIBILITY_MODE_NON_DISCOVERABLE;
@@ -42,12 +50,6 @@ void rkf_socket_connection_state_changed_cb(int, bt_socket_connection_state_e, b
 void rkf_state_changed_cb(int, bt_adapter_state_e, void *);
 gboolean timeout_func_cb(gpointer);
 
-
-
-#define VCONF_PLAYER_SHUFFLE	"db/private/org.tizen.music-player/shuffle"
-#define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/progress_pos"
-
-
 void _vconf_noti_callback(keynode_t *node, void* data)
 {
 	printf("%s:+++\n", __func__);
@@ -58,8 +60,12 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 	
 		printf("key changed: %s\n", keyname);
 #if 1
+		if (strcmp(keyname, VCONFKEY_APP_RELAY) == 0) 
+		{
+			printf("Pause MP3 player\n");
+		}
 		/*
-		if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
+	  else if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
 		{
 			bool shuffle = vconf_keynode_get_bool(node);
 			printf("shuffle=%d\n", shuffle);
@@ -113,6 +119,60 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 
 }
 
+Eina_Bool mp_app_mouse_event_cb(void *data, int type, void *event)
+{
+	printf("TEST\n");
+	if (type == ECORE_EVENT_MOUSE_BUTTON_DOWN) {
+		printf("ECORE_EVENT_MOUSE_BUTTON_DOWN\n");
+	}
+	else if (type == ECORE_EVENT_MOUSE_BUTTON_UP) {
+		printf("ECORE_EVENT_MOUSE_BUTTON_UP\n");
+	}
+
+	return 0;
+}
+
+bool initEcore()
+{
+	printf("initEcore()\n");
+
+	int ret, type;
+	Eina_Bool did = EINA_FALSE;
+	Ecore_Event_Handler *mouse_down = NULL;
+	Ecore_Event_Handler *handler = NULL;
+	Ecore_Event *event;
+
+	ret = ecore_init();
+	if (ret != 1)
+		printf("ecore_init fail\n");
+
+	ecore_event_init();
+	type = ecore_event_type_new();
+	if (type < 1) 
+		printf("type fail\n");
+
+	handler = ecore_event_handler_add(type, mp_app_mouse_event_cb, &did);
+	if (!handler) 
+		printf("Regi fail 1\n");
+
+	event = ecore_event_add(type, NULL, NULL, NULL);
+	if (!event)
+		printf("add fail\n");
+
+
+	mouse_down = ecore_event_handler_add(ECORE_EVENT_MOUSE_BUTTON_DOWN, mp_app_mouse_event_cb, NULL);
+	if (!mouse_down)
+		printf("Regi fail 2\n");
+
+	printf("%d %d\n", type, ECORE_EVENT_MOUSE_BUTTON_DOWN);
+
+	printf("main_loop_bengin()\n");
+	ecore_main_loop_begin();
+
+	ret = ecore_shutdown();
+	printf("unreached main_loop_bengin()\n");
+}
+
 bool initVconf()
 {
 	bool res = TRUE;
@@ -137,6 +197,12 @@ bool initVconf()
 		res = FALSE;
 	}
 	
+	if (vconf_notify_key_changed(VCONFKEY_APP_RELAY, _vconf_noti_callback, NULL) < 0)
+	{
+		printf("Error when register callback\n");
+		res = FALSE;
+	}
+
 	printf("%s:---:res=%d\n", __func__, res);
 	return res; 
 }
@@ -453,10 +519,10 @@ int main(int argc, char *argv[])
 	// Initialize vconf environments
 	initVconf();
 
-	
+	// Init ecore
+	initEcore();
 
 #if 0	// <--- ignore temporarily
->>>>>>> c34683e7bc1235c3c240c3e21386b25095cf2b15
 	// Initialize bluetooth
 	error = rkf_initialize_bluetooth(device_name);
 	if(error != 0) {
