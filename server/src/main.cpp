@@ -13,6 +13,9 @@
 #include <Ecore_X.h>
 #include <Ecore_Evas.h>
 
+#include <FBase.h> 
+#include <FApp.h>
+
 #undef LOG_TAG
 #define LOG_TAG "REMOTE_KEY_FW"
 
@@ -51,6 +54,18 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 #if 1
 		if (strcmp(keyname, VCONFKEY_APP_RELAY) == 0) 
 		{
+			Tizen::Base::String appId;
+			//appId.Insert(L"tizen.musicplayer", 0);
+			//Tizen::Base::String operationId;// = Tizen::Base::String(L"http://tizen.org/appcontrol/operation/view");
+			//Tizen::App::AppControl *pAc = Tizen::App::AppManager::FindAppControlN(appId, operationId);
+
+			//if (pAc) {
+			//	printf("OK\n");
+			//	delete pAc;
+			//} else {
+			//	printf("Fail\n");
+			//}
+
 			printf("Pause MP3 player\n");
 		}
 		/*

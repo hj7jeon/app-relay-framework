@@ -5,9 +5,9 @@ project(app_relay_svc CXX)
 # PKG_SEARCH_MODULE: used to check for given modules and uses the first working one
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(rpkgs-dlog REQUIRED dlog)
-PKG_CHECK_MODULES(rpkgs-capi REQUIRED capi-network-bluetooth capi-system-info)
+PKG_CHECK_MODULES(rpkgs-capi REQUIRED capi-network-bluetooth capi-system-info capi-appfw-app-manager)
 PKG_CHECK_MODULES(rpkgs-glib REQUIRED glib-2.0)
-PKG_CHECK_MODULES(rpkgs REQUIRED vconf heynoti)
+PKG_CHECK_MODULES(rpkgs REQUIRED vconf heynoti osp-appfw)
 PKG_CHECK_MODULES(rpkgs-ecore REQUIRED ecore ecore-x ecore-evas ecore-input)
 
 # Add CFLAGS used for required modules
@@ -31,8 +31,10 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	src/main.cpp
 )
 
+FIND_LIBRARY(OSP_LIBRARIES NAMES osp-appfw PATHS ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+
 # Set LDFLAGS
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${rpkgs-dlog_LDFLAGS} ${rpkgs-capi_LDFLAGS} ${rpkgs-glib_LDFLAGS} ${rpkgs-ecore_LDFLAGS} "-ldl -lrt -lvconf")
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OSP_LIBRARIES} ${rpkgs-dlog_LDFLAGS} ${rpkgs-capi_LDFLAGS} ${rpkgs-glib_LDFLAGS} ${rpkgs-ecore_LDFLAGS} "-ldl -lrt -lvconf")
 
 # Set CFLAGS
 ADD_DEFINITIONS(-Wall -O3) 
