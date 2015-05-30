@@ -288,17 +288,6 @@ int main(int argc, char *argv[])
 	gMainLoop = g_main_loop_new(NULL, FALSE);
 	printf("App Relay Sever started\n");
 
-#if 0
-	if(argc < 2) {
-		char errMsg[] = "No bluetooth device name, so its name is set as default.";
-		printf("%s\n", errMsg);
-		ALOGW("%s\n", errMsg);
-		device_name = default_device_name;
-	} else {
-		device_name = argv[1];
-	}
-#endif	
-
 //	rv = test_is_activated();		// need review after
 
 	pthread_attr_init(&attr);
