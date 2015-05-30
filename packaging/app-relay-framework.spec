@@ -2,7 +2,7 @@
 Name:       app-relay-framework
 Summary:    app relay framework
 Version:		0.1
-Release:    5
+Release:    15
 Group:      Framework/system
 License:    Apache License, Version 2.0
 Source0:    %{name}-%{version}.tar.gz

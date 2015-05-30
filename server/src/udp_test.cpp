@@ -17,211 +17,142 @@
 #include <assert.h>
 #include <tizen_error.h>
 
-#define MAXLINE  511 //최대값 지정
-#define BLOCK 255 //BLOCK 단위로 저장
+#define UDP_PORT    0x8000
+#define MAXLINE    1024
+#define MAX_FILE_NAME   128
 
-struct sockaddr_in servaddr;
-socklen_t addrlen = sizeof(servaddr); //서버 주소의 size를 저장
+#define CONNECTION_REQ  0x74160001
+#define CONNECTION_RSP  0x74160001 + 0x1000
 
-//메시지 전송 부분 처리
-void sendMessage(int s, char* buf) {
-    if((sendto(s, buf, strlen(buf), 0, (struct sockaddr *)&servaddr, addrlen)) < 0) {
-        perror("sendto fail");
-        exit(0);
-    }
-}
+#define REPORT_DATA_REQ 0x74160002
+#define REPORT_DATA_RSP 0x74160002 + 0x1000
 
-int udp_packet_send()
+#define PUSH_DATA_REQ   0x74160003
+#define PUSH_DATA_RSP   0x74160003 + 0x1000
+
+struct stMsg{
+	unsigned int ulMsgId;
+	unsigned int ulValue[4];        // Reserved
+	char        cName[MAX_FILE_NAME];
+};
+
+int socket_fd;
+
+int msg_send_func(unsigned int ulMsgId, char *strMsg, unsigned int ul1stValue, unsigned int ul2ndValue)
 {
-    int s; //socket
-    int nbyte;
-    char buf[MAXLINE+1], buf2[MAXLINE+1];
-    FILE *stream; //파일 입출력
+	struct stMsg stSendBuf;
+	struct sockaddr_in destaddr;
+	int addrlen = sizeof(destaddr); 
 
-    //socket 연결 0보다 작으면 Error
-    if((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("socket fail");
-        exit(0);
-    }
+	memset(&stSendBuf, 0x0, sizeof(stSendBuf));
 
-    //서버 주소 구조
-    memset(&servaddr, 0, addrlen); //bzero((char *)&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET; //인터넷 Addr Family
-    servaddr.sin_addr.s_addr = inet_addr("115.145.178.127"); //argv[1]에서 주소를 가져옴
-    servaddr.sin_port = htons(atoi("3927")); //argv[2]에서 port를 가져옴
+	stSendBuf.ulMsgId = htonl(ulMsgId);
+	strcpy(stSendBuf.cName, strMsg);
+	stSendBuf.ulValue[0] = htonl(ul1stValue);
+	stSendBuf.ulValue[1] = htonl(ul2ndValue);
 
-        if((stream = fopen("a.txt", "r")) == NULL) { //argv[3]의 파일을 open
-                printf("Error");
-                exit(1);
-        }
+	// Sender
+    destaddr.sin_family = AF_INET;
+    destaddr.sin_addr.s_addr = inet_addr("115.145.178.127"); 
+    destaddr.sin_port = htons(UDP_PORT);
 
-    //stream 파일 읽기
-        while(!feof(stream)) {
-                buf[0] = '\0'; //buffer를 초기화
-                fgets(buf, BLOCK, stream); //buffer에 BLOCK 만큼 읽어들임
-
-                printf("Send : %s\n", buf); //보낼 메시지 출력
-
-                sendMessage(s, buf);
-        }
-        fclose(stream);
-
-    sendMessage(s, "end of file"); //파일 입출력 전송 완료 처리
-
-    //recvfrom 처리 부분
-        if((stream = fopen("a.txt", "r")) == NULL) {
-                printf("Error not File");
-                exit(1);
-        }
-
-        while(!feof(stream))
-        {
-                buf2[0] = '\0'; //2번째 buffer 초기화
-                fgets(buf2, BLOCK, stream); //buf2에 파일을 읽어 들임
-                puts("get Server : waiting request.");
-        sendMessage(s, buf);
-                if((nbyte = recvfrom(s, buf, MAXLINE, 0,
-                                (struct sockaddr *)&servaddr, &addrlen)) < 0) {
-                        perror("recvfrom fail");
-                        exit(1);
-                }
-                buf[nbyte] = 0;
-
-                if(strncmp(buf, buf2, BLOCK)) { //전송 받은 buf와 buf2의 값 비교
-                        printf("Not Match buf : %s\nbuf2 : %s", buf, buf2);
-                        fclose(stream);
-                        exit(0);
-                } else {
-                        printf("Match buf : %s\nbuf2 : %s", buf, buf2);
-                }
-
-                puts("sendto complete");
-        }
-
-        fclose(stream); //stream close
-    close(s); //socket close
-    return 0;
+	if((sendto(socket_fd, &stSendBuf, sizeof(struct stMsg), 0, (struct sockaddr *)&destaddr, addrlen)) < 0) 
+	{
+		perror("sendto fail");
+		exit(0);
+	}
 }
 
 gboolean udp_test_thread(GIOChannel *source, GIOCondition condition, gpointer data)
 {
-	int rv;
+	int rv,icnt;
 	char a[10];
 
 	printf("Event received from stdin\n");
 
 	rv = read(0, a, 10);
-
-#if 0
-	if (rv <= 0 || a[0] == '0') {
-		rv = wifi_deinitialize();
-
-		if (rv != WIFI_ERROR_NONE)
-			printf("Fail to deinitialize.\n");
-
-		exit(1);
-	}
-#endif	
-
 	if (a[0] == '\n' || a[0] == '\r') {
-		printf("\n\n Network Connection API Test App\n\n");
-		printf("Options..\n");
-		printf("1 	- Wi-Fi init and set callbacks\n");
-		printf("2 	- Wi-Fi deinit(unset callbacks automatically)\n");
-		printf("3	- Activate Wi-Fi device\n");
-		printf("4 	- Deactivate Wi-Fi device\n");
-		printf("5 	- Is Wi-Fi activated?\n");
-		printf("6	- Get connection state\n");
-		printf("7 	- Get MAC address\n");
-		printf("8 	- Get Wi-Fi interface name\n");
-		printf("9 	- Scan request\n");
-		printf("a 	- Get Connected AP\n");
-		printf("b 	- Get AP list\n");
-		printf("c 	- Connect\n");
-		printf("d 	- Disconnect\n");
-		printf("e 	- Connect by wps pbc\n");
-		printf("f 	- Forget an AP\n");
-		printf("g 	- Set & connect EAP\n");
-		printf("h 	- Set IP method type\n");
-		printf("i 	- Set Proxy method type\n");
-		printf("j 	- Get AP info\n");
-		printf("k 	- Scan hidden AP\n");
-		printf("0 	- Exit \n");
-
+		printf("==================================\n\r");
+    	printf("1) Send Connection Req\n\r");
+    	printf("2) Send Report Data  Req\n\r");
+		printf("q) Send Report Data  Req\n\r");
+    	printf("==================================\n\r");
 		printf("ENTER  - Show options menu.......\n");
 	}
 
-	switch (a[0]) {
-	case '1':
-		rv = udp_packet_send();
-		break;
-#if 0		
-	case '2':
-		rv = test_wifi_deinit();
-		break;
-	case '3':
-		rv = test_wifi_activate();
-		break;
-	case '4':
-		rv = test_wifi_deactivate();
-		break;
-	case '5':
-		rv = test_is_activated();
-		break;
-	case '6':
-		rv = test_get_connection_state();
-		break;
-	case '7':
-		rv = test_get_mac_address();
-		break;
-	case '8':
-		rv = test_get_interface_name();
-		break;
-	case '9':
-		rv = test_scan_request();
-		break;
-	case 'a':
-		rv = test_get_connected_ap();
-		break;
-	case 'b':
-		rv = test_foreach_found_aps();
-		break;
-	case 'c':
-		rv = test_connect_ap();
-		break;
-	case 'd':
-		rv = test_disconnect_ap();
-		break;
-	case 'e':
-		rv = test_connect_wps();
-		break;
-	case 'f':
-		rv = test_forget_ap();
-		break;
-	case 'g':
-		rv = test_connect_eap_ap();
-		break;
-	case 'h':
-		rv = test_set_ip_method();
-		break;
-	case 'i':
-		rv = test_set_proxy_method();
-		break;
-	case 'j':
-		rv = test_get_ap_info();
-		break;
-	case 'k':
-		rv = test_scan_hidden_ap();
-		break;
-#endif		
-	default:
-		break;
-	}
+	switch (a[0]) 
+	{
+		case '1':
+			printf("Send Connenction Req Message \n\r");
+			msg_send_func(CONNECTION_REQ, "", 0, 0);
+			break;
+			
+		case '2':
+			printf("Send Report Data Req Message \n\r");
+			msg_send_func(REPORT_DATA_REQ, "/abc/hyojin.mp3", 1234, 87);
+			break;
 
-	if (rv == 1)
-		printf("Operation succeeded!\n");
-	else
-		printf("Operation filed!\n");
+		case 'q':
+			return TRUE;
+			break;
+			
+		default:
+			break;
+	}
 
 	return TRUE;
 }
+
+void *udp_thread_start(void*)
+{
+	char RecvBuf[MAXLINE];
+	struct stMsg *stUdpMsg;
+	int nbyte;
+	struct sockaddr_in cliaddr;
+	int icnt, iMode;
+	struct sockaddr_in srcaddr;
+	int addrlen = sizeof(srcaddr);
+
+	if((socket_fd = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("socket fail");
+        exit(0);
+    }
+
+	// Receiver 
+	srcaddr.sin_family = AF_INET;
+	srcaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	srcaddr.sin_port = htons(UDP_PORT);
+
+	if(bind(socket_fd, (struct sockaddr *)&srcaddr, addrlen) < 0) {
+	    perror("bind fail");
+	    exit(0);
+	}
+
+	while(1)
+	{
+		printf("\n\rNow waiting...\n\r");
+	
+		memset(RecvBuf, 0, sizeof(RecvBuf));
+	
+		nbyte = recvfrom(socket_fd, RecvBuf, MAXLINE , 0, (struct sockaddr *)&cliaddr, (socklen_t *)&addrlen);
+		if(nbyte< 0) 
+	    {
+	        perror("recvfrom fail");
+	        exit(1);
+	    }
+
+		stUdpMsg = (struct stMsg *)RecvBuf;
+
+		printf("\n\r");
+		printf("Message ID : 0x%08X \n\r", ntohl(stUdpMsg->ulMsgId));
+		printf("File Name  : [%s] \n\r", stUdpMsg->cName);
+		printf("1st  Value : %d \n\r", ntohl(stUdpMsg->ulValue[0]));
+		printf("2nd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[1]));
+		printf("3rd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[2]));
+		printf("4th  Value : %d \n\r", ntohl(stUdpMsg->ulValue[3]));
+	}
+
+	close(socket_fd);
+}
+	
+
