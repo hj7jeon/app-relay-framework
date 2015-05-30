@@ -1,8 +1,8 @@
 ## Basic Descriptions of this package
 Name:       app-relay-framework
 Summary:    app relay framework
-Version:		1.1
-Release:    1
+Version:		0.1
+Release:    01
 Group:      Framework/system
 License:    Apache License, Version 2.0
 Source0:    %{name}-%{version}.tar.gz
@@ -13,14 +13,17 @@ Source1:    app-relay-framework.service
 BuildRequires:  cmake
 BuildRequires:  libattr-devel
 BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(capi-network-bluetooth)
+#BuildRequires:  pkgconfig(capi-network-bluetooth)
 BuildRequires:  pkgconfig(capi-system-info)
+BuildRequires:  pkgconfig(capi-network-wifi)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(heynoti)
 BuildRequires:  pkgconfig(ecore-x)
 BuildRequires:  pkgconfig(ecore-evas)
+BuildRequires:  pkgconfig(capi-appfw-app-manager)
+BuildRequires:  pkgconfig(osp-appfw)
 
 ## Description string that this package's human users can understand
 %description
