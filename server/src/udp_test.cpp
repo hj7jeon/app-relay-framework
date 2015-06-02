@@ -27,7 +27,6 @@
 #define UDP_PORT    0x8000
 #define MAXLINE    1024
 
-
 int socket_fd;
 
 int msg_send_func(unsigned int ulMsgId, char *strMsg, unsigned int ul1stValue, unsigned int ul2ndValue)
@@ -167,11 +166,11 @@ void *udp_thread_start(void*)
 
 			printf("\n\r");
 			printf("Message ID : 0x%08X \n\r", ntohl(stUdpMsg->ulMsgId));
+			printf("1st  Value : %d \n\r", stUdpMsg->ulValue[0]);
+			printf("2nd  Value : %d \n\r", stUdpMsg->ulValue[1]);
+			printf("3rd  Value : %d \n\r", stUdpMsg->ulValue[2]);
+			printf("4th  Value : %d \n\r", stUdpMsg->ulValue[3]);
 			printf("File Name  : [%s] \n\r", stUdpMsg->cName);
-			printf("1st  Value : %d \n\r", ntohl(stUdpMsg->ulValue[0]));
-			printf("2nd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[1]));
-			printf("3rd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[2]));
-			printf("4th  Value : %d \n\r", ntohl(stUdpMsg->ulValue[3]));
 
 			switch(ntohl(stUdpMsg->ulMsgId))
 			{
