@@ -43,9 +43,9 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 {
 	printf("%s:+++\n", __func__);
 
-
 		struct appdata *ad = (struct appdata *)data;
 		char *keyname = vconf_keynode_get_name(node);
+		int a=0,b=0;
 	
 		printf("key changed: %s\n", keyname);
 #if 1
@@ -64,6 +64,18 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 			//}
 
 			printf("Pause MP3 player\n");
+
+#if 1
+			//TODO: get vconf information form Music-Player
+			double progress;
+			vconf_get_dbl("memory/private/org.tizen.music-player/pos", &progress);
+			
+			a = (unsigned int)progress;
+			b = (unsigned int)((progress - (double)a) * 1000.);
+#endif
+			//TODO: send message to server with vconf info
+			msg_send_func(REPORT_DATA_REQ, "", a, b);
+			
 		}
 		/*
 	  else if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)

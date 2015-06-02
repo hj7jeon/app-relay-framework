@@ -21,17 +21,12 @@
 #include <dlog.h>
 #include <udp_test.h>
 
+#include <vconf.h>
+
+
 #define UDP_PORT    0x8000
 #define MAXLINE    1024
 
-#define CONNECTION_REQ  0x74160001
-#define CONNECTION_RSP  0x74160001 + 0x1000
-
-#define REPORT_DATA_REQ 0x74160002
-#define REPORT_DATA_RSP 0x74160002 + 0x1000
-
-#define PUSH_DATA_REQ   0x74160003
-#define PUSH_DATA_RSP   0x74160003 + 0x1000
 
 int socket_fd;
 
@@ -155,6 +150,8 @@ void *udp_thread_start(void*)
 	struct sockaddr_in cliaddr;
 	int addrlen = sizeof(cliaddr);
 	int icnt;
+	double progress;
+	unsigned a,b;
 
 	global_socket_init();
 
@@ -191,6 +188,14 @@ void *udp_thread_start(void*)
 				case PUSH_DATA_REQ:
 					printf("Get Push Data Req Message\n\r");
 					msg_send_func(PUSH_DATA_RSP, "", 0, 0);
+
+					// To Do : process value , Launch Music Player, send Posisition Data
+					a = ntohl(stUdpMsg->ulValue[0]);
+					b = ntohl(stUdpMsg->ulValue[1]);
+					progress = (double)a + ((double)b / 1000.);
+
+					vconf_set_dbl("memory/private/org.tizen.music-player/pos", progress);
+					
 					break;
 
 				default :
