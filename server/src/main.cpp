@@ -48,99 +48,38 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 {
 	printf("%s:+++\n", __func__);
 
-		struct appdata *ad = (struct appdata *)data;
-		char *keyname = vconf_keynode_get_name(node);
-		int a=0,b=0;
-	
-		printf("key changed: %s\n", keyname);
-#if 1
-		if (strcmp(keyname, VCONFKEY_APP_RELAY) == 0) 
-		{
-			//Tizen::Base::String uri = L"tel:12345678900";
-			//Tizen::Base::String str1 = L"tizen.phone";
-			//Tizen::Base::String str2 = L"http://tizen.org/appcontrol/operation/dial";
-			//Tizen::App::AppControl* pAc = Tizen::App::AppManager::FindAppControlN(str1, str2);
+	struct appdata *ad = (struct appdata *)data;
+	char *keyname = vconf_keynode_get_name(node);
+	int a=0,b=0;
 
-			//if (pAc) {
-			//	printf("Dial OK\n");
-			//	pAc->Start(&uri, null, null, null);
-			//	delete pAc;
-			//}
+	printf("key changed: %s\n", keyname);
 
-			// app_manager_open_app(MUSIC_PLAYER_PKG_NAME);
-			aul_open_app(MUSIC_PLAYER_PKG_NAME);
-			//Tizen::App::AppId id = L"tizen.calculator";
-			//Tizen::App::AppManager* pAppManager = Tizen::App::AppManager::GetInstance();
+	if (strcmp(keyname, VCONFKEY_APP_RELAY) == 0) 
+	{
 
-			//pAppManager->LaunchApplication(id, Tizen::App::AppManager::LAUNCH_OPTION_DEFAULT);
+		//TODO: get vconf information form Music-Player
+		double progress;
+		vconf_get_dbl("memory/private/org.tizen.music-player/pos", &progress);
 
-			printf("Launch MP3 player\n");
+		a = (unsigned int)progress;
+		b = (unsigned int)((progress - (double)a) * 1000.);
 
-#if 1
-			//TODO: get vconf information form Music-Player
-			double progress;
-			vconf_get_dbl("memory/private/org.tizen.music-player/pos", &progress);
-			
-			a = (unsigned int)progress;
-			b = (unsigned int)((progress - (double)a) * 1000.);
+		//TODO: send message to server with vconf info
+		msg_send_func(REPORT_DATA_REQ, "", a, b);
+
+	}
+#if 0
+	else if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
+	{
+		bool shuffle = vconf_keynode_get_bool(node);
+		printf("shuffle=%d\n", shuffle);
+	}
 #endif
-			//TODO: send message to server with vconf info
-			msg_send_func(REPORT_DATA_REQ, "", a, b);
-			
-		}
-		/*
-	  else if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
-		{
-			bool shuffle = vconf_keynode_get_bool(node);
-			printf("shuffle=%d\n", shuffle);
-		}
-		else if (strcmp(keyname, VCONF_PLAYER_PROGRESS) == 0)
-		{
-			double progress = vconf_get_dbl(node);
-			printf("prgress changed: %ld", progress);
-		}
-		else if (strcmp(keyname, MP_VCONFKEY_PLAYING_PID) == 0)
-		{
-			int playing_pid = vconf_keynode_get_int(node);
-			if (playing_pid != getpid())
-			{
-				DEBUG_TRACE("other player activated : [pid:%d]", playing_pid);
-				if (ad->player_state == PLAY_STATE_PLAYING) {
-					ad->paused_by_other_player = TRUE;
-					mp_play_control_play_pause(ad, false);
-				}
-	
-				//mp_minicontroller_destroy(ad);
-			}
-		}
-		*/		
-#else
-	switch(vconf_keynode_get_type(node))
-   {
-	  case VCONF_TYPE_INT:
-   printf("key = %s, value = %d(int)\n",
-	   vconf_keynode_get_name(key), vconf_keynode_get_int(key));
-   break;
-	  case VCONF_TYPE_BOOL:
-   printf("key = %s, value = %d(bool)\n",
-	   vconf_keynode_get_name(key), vconf_keynode_get_bool(key));
-   break;
-	  case VCONF_TYPE_DOUBLE:
-   printf("key = %s, value = %f(double)\n",
-	   vconf_keynode_get_name(key), vconf_keynode_get_dbl(key));
-   break;
-	  case VCONF_TYPE_STRING:
-   printf("key = %s, value = %s(string)\n",
-	   vconf_keynode_get_name(key), vconf_keynode_get_str(key));
-   break;
-	  default:
-   fprintf(stderr, "Unknown Type(%d)\n", vconf_keynode_get_type(key));
-   break;
-   }
-   return;
-
-#endif		
-
+	else if (strcmp(keyname, VCONF_PLAYER_PROGRESS) == 0)
+	{
+		aul_open_app(MUSIC_PLAYER_PKG_NAME);
+		printf("Launch MP3 player\n");
+	}
 }
 
 Eina_Bool mp_app_mouse_event_cb(void *data, int type, void *event)
