@@ -204,11 +204,11 @@ bool initVconf()
 	printf("b_val=%d\n", !b_val);
 #endif	
 
-	if (vconf_notify_key_changed(VCONF_PLAYER_SHUFFLE, _vconf_noti_callback, NULL) < 0)
-	{
-		printf("Error when register callback\n");
-		res = FALSE;
-	}
+	//if (vconf_notify_key_changed(VCONF_PLAYER_SHUFFLE, _vconf_noti_callback, NULL) < 0)
+	//{
+	//	printf("Error when register callback\n");
+	//	res = FALSE;
+	//}
 	
 	if (vconf_notify_key_changed(VCONFKEY_APP_RELAY, _vconf_noti_callback, NULL) < 0)
 	{
