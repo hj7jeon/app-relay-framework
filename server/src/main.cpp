@@ -285,6 +285,9 @@ int main(int argc, char *argv[])
 	pthread_attr_t attr;
     pthread_t thread_t;
 
+	pthread_attr_t attr_2;
+    pthread_t thread_t_2;
+
 	gMainLoop = g_main_loop_new(NULL, FALSE);
 	printf("App Relay Sever started\n");
 
@@ -294,7 +297,7 @@ int main(int argc, char *argv[])
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_create(&thread_t, &attr, &udp_thread_start, NULL);
 
-#if 1
+#if 0
 	GIOChannel *channel = g_io_channel_unix_new(0);
 	g_io_add_watch(channel, (GIOCondition)(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL), udp_test_thread, NULL);
 #endif	
