@@ -57,6 +57,9 @@ mkdir -p %{buildroot}%{_libdir}/systemd/system/graphical.target.wants
 install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/system/
 ln -s ../app-relay-framework.service %{buildroot}%{_libdir}/systemd/system/graphical.target.wants/app-relay-framework.service
 
+mkdir -p %{buildroot}/opt/etc/smack/accesses.d
+install -m 644 app-relay-framework.rule %{buildroot}/opt/etc/smack/accesses.d
+
 ## Postprocess script
 %post 
 
@@ -67,3 +70,4 @@ ln -s ../app-relay-framework.service %{buildroot}%{_libdir}/systemd/system/graph
 %{_libdir}/systemd/system/app-relay-framework.service
 %{_libdir}/systemd/system/graphical.target.wants/app-relay-framework.service
 /usr/share/license/%{name}
+/opt/etc/smack/accesses.d/app-relay-framework.rule
