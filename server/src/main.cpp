@@ -191,7 +191,7 @@ bool initVconf()
 	bool res = TRUE;
 
 	printf("%s:+++\n", __func__);
-#if 1
+#if 0
 	//TODO: vconf function test
 	int b_val = 0;
 	vconf_get_bool("db/private/org.tizen.music-player/shuffle", &b_val);
@@ -202,14 +202,14 @@ bool initVconf()
 		vconf_set_bool("db/private/org.tizen.music-player/shuffle", TRUE);
 
 	printf("b_val=%d\n", !b_val);
-#endif	
 
 	//if (vconf_notify_key_changed(VCONF_PLAYER_SHUFFLE, _vconf_noti_callback, NULL) < 0)
 	//{
 	//	printf("Error when register callback\n");
 	//	res = FALSE;
 	//}
-	
+#endif	
+
 	if (vconf_notify_key_changed(VCONFKEY_APP_RELAY, _vconf_noti_callback, NULL) < 0)
 	{
 		printf("Error when register callback\n");

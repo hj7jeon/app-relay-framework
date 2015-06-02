@@ -189,9 +189,10 @@ void *udp_thread_start(void*)
 					msg_send_func(PUSH_DATA_RSP, "", 0, 0);
 
 					// To Do : process value , Launch Music Player, send Posisition Data
-					a = ntohl(stUdpMsg->ulValue[0]);
-					b = ntohl(stUdpMsg->ulValue[1]);
+					a = stUdpMsg->ulValue[0];
+					b = stUdpMsg->ulValue[1];
 					progress = (double)a + ((double)b / 1000.);
+					printf("progress is [%8.3f] \n\r", progress);
 
 					vconf_set_dbl("memory/private/org.tizen.music-player/pos", progress);
 					
