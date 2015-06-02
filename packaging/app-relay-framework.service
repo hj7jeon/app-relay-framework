@@ -1,13 +1,13 @@
 [Unit]
 Description=Start the app relay framework
-#After=load-virtual-homekey.service net-config.service
+After=net-config.service
 
 [Service]
 #You can the name of bluetooth device by changing the parameter to rkf_server.
 ExecStart=/usr/bin/app_relay_svc
-Type=oneshot
-#Restart=always
-#RestartSec=1
+#Type=oneshot
+Restart=always
+RestartSec=3
 
 [Install]
 WantedBy=graphical.target

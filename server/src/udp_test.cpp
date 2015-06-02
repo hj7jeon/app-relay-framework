@@ -1,3 +1,4 @@
+
 #include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,9 +18,11 @@
 #include <assert.h>
 #include <tizen_error.h>
 
+#include <dlog.h>
+#include <udp_test.h>
+
 #define UDP_PORT    0x8000
 #define MAXLINE    1024
-#define MAX_FILE_NAME   128
 
 #define CONNECTION_REQ  0x74160001
 #define CONNECTION_RSP  0x74160001 + 0x1000
@@ -30,12 +33,6 @@
 #define PUSH_DATA_REQ   0x74160003
 #define PUSH_DATA_RSP   0x74160003 + 0x1000
 
-struct stMsg{
-	unsigned int ulMsgId;
-	unsigned int ulValue[4];        // Reserved
-	char        cName[MAX_FILE_NAME];
-};
-
 int socket_fd;
 
 int msg_send_func(unsigned int ulMsgId, char *strMsg, unsigned int ul1stValue, unsigned int ul2ndValue)
@@ -43,6 +40,16 @@ int msg_send_func(unsigned int ulMsgId, char *strMsg, unsigned int ul1stValue, u
 	struct stMsg stSendBuf;
 	struct sockaddr_in destaddr;
 	int addrlen = sizeof(destaddr); 
+	FILE *fp;
+	char ip_addr[16];
+
+	memset(ip_addr, 0, sizeof(ip_addr));
+
+	fp = fopen("/temp/app_relay_sever_ip.txt", "r");
+	fread(ip_addr, 1, 15, fp);
+	fclose(fp);
+
+	printf("\n\r Dest Ip Addres is %s \n\r",ip_addr);
 
 	memset(&stSendBuf, 0x0, sizeof(stSendBuf));
 
@@ -53,7 +60,7 @@ int msg_send_func(unsigned int ulMsgId, char *strMsg, unsigned int ul1stValue, u
 
 	// Sender
     destaddr.sin_family = AF_INET;
-    destaddr.sin_addr.s_addr = inet_addr("115.145.178.127"); 
+    destaddr.sin_addr.s_addr = inet_addr((const char*)ip_addr); 
     destaddr.sin_port = htons(UDP_PORT);
 
 	if((sendto(socket_fd, &stSendBuf, sizeof(struct stMsg), 0, (struct sockaddr *)&destaddr, addrlen)) < 0) 
@@ -103,16 +110,17 @@ gboolean udp_test_thread(GIOChannel *source, GIOCondition condition, gpointer da
 	return TRUE;
 }
 
-void *udp_thread_start(void*)
+bool bConnectionDone = FALSE;
+unsigned int ulSendCount = 0;
+
+void global_socket_init()
 {
-	char RecvBuf[MAXLINE];
-	struct stMsg *stUdpMsg;
-	int nbyte;
-	struct sockaddr_in cliaddr;
-	int icnt, iMode;
 	struct sockaddr_in srcaddr;
 	int addrlen = sizeof(srcaddr);
+	int iMode;
 
+	close(socket_fd);
+	
 	if((socket_fd = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("socket fail");
         exit(0);
@@ -123,33 +131,87 @@ void *udp_thread_start(void*)
 	srcaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	srcaddr.sin_port = htons(UDP_PORT);
 
+	#if 1
+    iMode = 1;
+    if (ioctl(socket_fd, FIONBIO, &iMode))
+    {
+        perror("ioctl failed");
+        exit(0);
+    }
+    #endif
+
 	if(bind(socket_fd, (struct sockaddr *)&srcaddr, addrlen) < 0) {
 	    perror("bind fail");
 	    exit(0);
 	}
+}
+
+
+void *udp_thread_start(void*)
+{
+	char RecvBuf[MAXLINE];
+	struct stMsg *stUdpMsg;
+	int nbyte;
+	struct sockaddr_in cliaddr;
+	int addrlen = sizeof(cliaddr);
+	int icnt;
+
+	global_socket_init();
 
 	while(1)
 	{
-		printf("\n\rNow waiting...\n\r");
+		ALOGI("\n\rNow waiting...\n\r");
 	
 		memset(RecvBuf, 0, sizeof(RecvBuf));
-	
 		nbyte = recvfrom(socket_fd, RecvBuf, MAXLINE , 0, (struct sockaddr *)&cliaddr, (socklen_t *)&addrlen);
-		if(nbyte< 0) 
-	    {
-	        perror("recvfrom fail");
-	        exit(1);
-	    }
+		if(nbyte > 0)
+		{
+			stUdpMsg = (struct stMsg *)RecvBuf;
 
-		stUdpMsg = (struct stMsg *)RecvBuf;
+			printf("\n\r");
+			printf("Message ID : 0x%08X \n\r", ntohl(stUdpMsg->ulMsgId));
+			printf("File Name  : [%s] \n\r", stUdpMsg->cName);
+			printf("1st  Value : %d \n\r", ntohl(stUdpMsg->ulValue[0]));
+			printf("2nd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[1]));
+			printf("3rd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[2]));
+			printf("4th  Value : %d \n\r", ntohl(stUdpMsg->ulValue[3]));
 
-		printf("\n\r");
-		printf("Message ID : 0x%08X \n\r", ntohl(stUdpMsg->ulMsgId));
-		printf("File Name  : [%s] \n\r", stUdpMsg->cName);
-		printf("1st  Value : %d \n\r", ntohl(stUdpMsg->ulValue[0]));
-		printf("2nd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[1]));
-		printf("3rd  Value : %d \n\r", ntohl(stUdpMsg->ulValue[2]));
-		printf("4th  Value : %d \n\r", ntohl(stUdpMsg->ulValue[3]));
+			switch(ntohl(stUdpMsg->ulMsgId))
+			{
+				case CONNECTION_RSP:
+					printf("Get Connection Rsp Message\n\r");
+					printf("Connection complete!!\n\r");
+					bConnectionDone = TRUE;
+					break;
+
+				case REPORT_DATA_RSP:
+					printf("Get Report Rsp Message\n\r");
+					break;
+
+				case PUSH_DATA_REQ:
+					printf("Get Push Data Req Message\n\r");
+					msg_send_func(PUSH_DATA_RSP, "", 0, 0);
+					break;
+
+				default :
+					break;
+			}
+		}
+
+		if(bConnectionDone == FALSE)
+		{
+			printf("Send Connenction Req Message \n\r");
+			msg_send_func(CONNECTION_REQ, "", 0, 0);
+			ulSendCount++;
+		}
+
+		if(ulSendCount > 5)
+		{
+			ulSendCount = 0;
+			global_socket_init();
+		}
+
+		sleep(1);
 	}
 
 	close(socket_fd);
