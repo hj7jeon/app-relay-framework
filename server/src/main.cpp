@@ -34,7 +34,7 @@
 #define LOG_TAG "APP_RELAY_FW"
 
 #define VCONF_PLAYER_SHUFFLE	"db/private/org.tizen.music-player/shuffle"
-#define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/progress_pos"
+#define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/pos"
 
 #define VCONFKEY_APP_RELAY	"db/private/org.tizen.menu-screen/app_relay"
 
@@ -59,7 +59,7 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 
 		//TODO: get vconf information form Music-Player
 		double progress;
-		vconf_get_dbl("memory/private/org.tizen.music-player/pos", &progress);
+		vconf_get_dbl(VCONF_PLAYER_PROGRESS, &progress);
 
 		a = (unsigned int)progress;
 		b = (unsigned int)((progress - (double)a) * 1000.);

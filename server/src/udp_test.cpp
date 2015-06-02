@@ -22,10 +22,13 @@
 #include <udp_test.h>
 
 #include <vconf.h>
+#include <aul.h>
 
 
 #define UDP_PORT    0x8000
 #define MAXLINE    1024
+
+#define MUSIC_PLAYER_PKG_NAME "org.tizen.music-player"
 
 int socket_fd;
 
@@ -195,7 +198,8 @@ void *udp_thread_start(void*)
 					printf("progress is [%8.3f] \n\r", progress);
 
 					vconf_set_dbl("memory/private/org.tizen.music-player/pos", progress);
-					
+					aul_open_app(MUSIC_PLAYER_PKG_NAME);
+
 					break;
 
 				default :
