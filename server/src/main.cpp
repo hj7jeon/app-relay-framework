@@ -27,6 +27,9 @@
 #include <FBase.h> 
 #include <FApp.h>
 
+#include <aul.h>
+#include <app_manager.h>
+
 #undef LOG_TAG
 #define LOG_TAG "APP_RELAY_FW"
 
@@ -34,6 +37,8 @@
 #define VCONF_PLAYER_PROGRESS	"memory/private/org.tizen.music-player/progress_pos"
 
 #define VCONFKEY_APP_RELAY	"db/private/org.tizen.menu-screen/app_relay"
+
+#define MUSIC_PLAYER_PKG_NAME "org.tizen.music-player"
 
 static GMainLoop* gMainLoop = NULL;
 static int gSocketFd = -1;
@@ -51,19 +56,25 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 #if 1
 		if (strcmp(keyname, VCONFKEY_APP_RELAY) == 0) 
 		{
-			Tizen::Base::String appId;
-			//appId.Insert(L"tizen.musicplayer", 0);
-			//Tizen::Base::String operationId;// = Tizen::Base::String(L"http://tizen.org/appcontrol/operation/view");
-			//Tizen::App::AppControl *pAc = Tizen::App::AppManager::FindAppControlN(appId, operationId);
+			//Tizen::Base::String uri = L"tel:12345678900";
+			//Tizen::Base::String str1 = L"tizen.phone";
+			//Tizen::Base::String str2 = L"http://tizen.org/appcontrol/operation/dial";
+			//Tizen::App::AppControl* pAc = Tizen::App::AppManager::FindAppControlN(str1, str2);
 
 			//if (pAc) {
-			//	printf("OK\n");
+			//	printf("Dial OK\n");
+			//	pAc->Start(&uri, null, null, null);
 			//	delete pAc;
-			//} else {
-			//	printf("Fail\n");
 			//}
 
-			printf("Pause MP3 player\n");
+			// app_manager_open_app(MUSIC_PLAYER_PKG_NAME);
+			aul_open_app(MUSIC_PLAYER_PKG_NAME);
+			//Tizen::App::AppId id = L"tizen.calculator";
+			//Tizen::App::AppManager* pAppManager = Tizen::App::AppManager::GetInstance();
+
+			//pAppManager->LaunchApplication(id, Tizen::App::AppManager::LAUNCH_OPTION_DEFAULT);
+
+			printf("Launch MP3 player\n");
 
 #if 1
 			//TODO: get vconf information form Music-Player
