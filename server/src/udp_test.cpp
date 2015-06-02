@@ -19,10 +19,10 @@
 #include <tizen_error.h>
 
 #include <dlog.h>
+#include <udp_test.h>
 
 #define UDP_PORT    0x8000
 #define MAXLINE    1024
-#define MAX_FILE_NAME   128
 
 #define CONNECTION_REQ  0x74160001
 #define CONNECTION_RSP  0x74160001 + 0x1000
@@ -32,12 +32,6 @@
 
 #define PUSH_DATA_REQ   0x74160003
 #define PUSH_DATA_RSP   0x74160003 + 0x1000
-
-struct stMsg{
-	unsigned int ulMsgId;
-	unsigned int ulValue[4];        // Reserved
-	char        cName[MAX_FILE_NAME];
-};
 
 int socket_fd;
 
