@@ -23,14 +23,30 @@
 
 #include <vconf.h>
 #include <aul.h>
-
+#include <app.h>
 
 #define UDP_PORT    0x8000
 #define MAXLINE    1024
 
 #define MUSIC_PLAYER_PKG_NAME "org.tizen.music-player"
+#define SOUND_PLAYER_PKG_NAME "org.tizen.sound-player"
 
 int socket_fd;
+
+static void playMusic()
+{
+	service_h service;
+	service_create(&service);
+	service_set_operation(service, SERVICE_OPERATION_VIEW);
+	service_set_package(service, SOUND_PLAYER_PKG_NAME);
+	service_set_uri(service, "file:///opt/usr/media/Downloads/2.mp3");
+	if (service_send_launch_request(service, NULL, NULL) == SERVICE_ERROR_NONE) {
+		printf("Success\n");
+	} else {
+		printf("Fail\n");
+	}
+	service_destroy(service);
+}
 
 int msg_send_func(unsigned int ulMsgId, char *strMsg, unsigned int ul1stValue, unsigned int ul2ndValue)
 {
@@ -198,7 +214,14 @@ void *udp_thread_start(void*)
 					printf("progress is [%8.3f] \n\r", progress);
 
 					vconf_set_dbl("memory/private/org.tizen.music-player/pos", progress);
+					/*
 					aul_open_app(MUSIC_PLAYER_PKG_NAME);
+					printf("start music play\n");
+					aul_open_file("/opt/usr/media/Downloads/2.mp3");
+					printf("music play\n");
+					*/
+
+					playMusic();
 
 					vconf_set_bool("memory/private/org.tizen.music-player/player_state", 1);
 

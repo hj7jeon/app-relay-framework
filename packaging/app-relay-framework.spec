@@ -24,6 +24,7 @@ BuildRequires:  pkgconfig(heynoti)
 BuildRequires:  pkgconfig(ecore-x)
 BuildRequires:  pkgconfig(ecore-evas)
 BuildRequires:  pkgconfig(capi-appfw-app-manager)
+BuildRequires:  pkgconfig(capi-appfw-application)
 BuildRequires:  pkgconfig(osp-appfw)
 
 ## Description string that this package's human users can understand
