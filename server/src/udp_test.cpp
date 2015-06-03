@@ -200,6 +200,8 @@ void *udp_thread_start(void*)
 					vconf_set_dbl("memory/private/org.tizen.music-player/pos", progress);
 					aul_open_app(MUSIC_PLAYER_PKG_NAME);
 
+					vconf_set_bool("memory/private/org.tizen.music-player/player_state", 1);
+
 					break;
 
 				default :
