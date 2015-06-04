@@ -223,7 +223,7 @@ void *udp_thread_start(void*)
 
 					playMusic();
 
-					vconf_set_bool("memory/private/org.tizen.music-player/player_state", 1);
+					// vconf_set_bool("memory/private/org.tizen.music-player/player_state", 1);
 
 					break;
 
