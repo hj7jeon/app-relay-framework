@@ -56,6 +56,8 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 
 	if (strcmp(keyname, VCONFKEY_APP_RELAY) == 0) 
 	{
+		vconf_set_bool("memory/private/org.tizen.music-player/player_state", 0);
+		usleep(1000*100);
 
 		//TODO: get vconf information form Music-Player
 		double progress;
@@ -66,8 +68,6 @@ void _vconf_noti_callback(keynode_t *node, void* data)
 
 		//TODO: send message to server with vconf info
 		msg_send_func(REPORT_DATA_REQ, "", a, b);
-
-		vconf_set_bool("memory/private/org.tizen.music-player/player_state", 0);
 	}
 #if 0
 	else if (strcmp(keyname, VCONF_PLAYER_SHUFFLE) == 0)
